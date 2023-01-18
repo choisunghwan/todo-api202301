@@ -21,7 +21,7 @@ public class TodoApiController {
     private final TodoService todoService;
 
 
-    // 할 일 등록 요청
+    // 할 일 등록 요청 (POST)
     @PostMapping
     public ResponseEntity<?> createTodo(
             @Validated @RequestBody TodoCreateRequestDTO requestDTO
@@ -48,7 +48,7 @@ public class TodoApiController {
 
     }
 
-    //할일 삭제 요청
+    //할일 삭제 요청 (DELETE)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTodo(
             @PathVariable("id")String todoId
