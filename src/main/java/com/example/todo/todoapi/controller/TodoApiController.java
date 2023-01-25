@@ -13,10 +13,14 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/todos")
+//CORS 허용 설정
+@CrossOrigin
+
 public class TodoApiController {
     private final TodoService todoService;
 
@@ -25,7 +29,7 @@ public class TodoApiController {
     @PostMapping
     public ResponseEntity<?> createTodo(
             @Validated @RequestBody TodoCreateRequestDTO requestDTO
-    , BindingResult result
+            , BindingResult result
     ){
         if(result.hasErrors()){
             log.warn("DTD 검증 에러 발생: {}", result.getFieldError());
