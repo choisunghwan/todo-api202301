@@ -13,37 +13,35 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/todos")
-//CORS 허용 설정
+// CORS 허용 설정
 @CrossOrigin
-
 public class TodoApiController {
+
     private final TodoService todoService;
 
-
-    // 할 일 등록 요청 (POST)
+    // 할 일 등록 요청
     @PostMapping
     public ResponseEntity<?> createTodo(
             @Validated @RequestBody TodoCreateRequestDTO requestDTO
             , BindingResult result
-    ){
-        if(result.hasErrors()){
-            log.warn("DTD 검증 에러 발생: {}", result.getFieldError());
+    ) {
+        if (result.hasErrors()) {
+            log.warn("DTO 검증 에러 발생 : {}", result.getFieldError());
             return ResponseEntity
                     .badRequest()
                     .body(result.getFieldError());
         }
 
-        try{
+        try {
             TodoListResponseDTO responseDTO = todoService.create(requestDTO);
             return ResponseEntity
                     .ok()
                     .body(responseDTO);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             log.error(e.getMessage());
             return ResponseEntity
                     .internalServerError()
@@ -52,22 +50,23 @@ public class TodoApiController {
 
     }
 
-    //할일 삭제 요청 (DELETE)
+    // 할 일 삭제 요청
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTodo(
-            @PathVariable("id")String todoId
-    ){
-        log.info("/api/todos/{} DELETE request!",todoId);
+            @PathVariable("id") String todoId
+    ) {
+        log.info("/api/todos/{} DELETE request!", todoId);
 
-        if(todoId == null || todoId.equals("")){
+        if (todoId == null || todoId.trim().equals("")) {
             return ResponseEntity
                     .badRequest()
                     .body(TodoListResponseDTO.builder().error("ID를 전달해주세요"));
         }
+
         try {
             TodoListResponseDTO responseDTO = todoService.delete(todoId);
             return ResponseEntity.ok().body(responseDTO);
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(TodoListResponseDTO.builder().error(e.getMessage()));
         }
@@ -81,6 +80,7 @@ public class TodoApiController {
         TodoListResponseDTO responseDTO = todoService.retrieve();
 
         return ResponseEntity.ok().body(responseDTO);
+
     }
 
     // 할 일 수정요청 (PUT, PATCH)
@@ -112,3 +112,10 @@ public class TodoApiController {
     }
 
 }
+
+
+
+
+
+
+

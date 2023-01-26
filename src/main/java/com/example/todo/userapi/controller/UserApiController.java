@@ -10,15 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@CrossOrigin
 public class UserApiController {
 
     private final UserService userService;
@@ -57,4 +55,17 @@ public class UserApiController {
                     .body(e.getMessage());
         }
     }
+
+    // 이메일 중복확인 요청 처리
+    // GET : /api/auth/check?email=abc@bbb.com
+    @GetMapping("/check")
+    public ResponseEntity<?> checkEmail(String email) {
+        if (email == null || email.trim().equals("")) {
+            return ResponseEntity.badRequest().body("이메일을 전달해 주세요");
+        }
+        boolean flag = userService.isDuplicate(email);
+        log.info("{} 중복 여부?? - {}", email, flag);
+        return ResponseEntity.ok().body(flag);
+    }
+
 }
