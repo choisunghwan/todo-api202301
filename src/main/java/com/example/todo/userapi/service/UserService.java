@@ -3,6 +3,8 @@ package com.example.todo.userapi.service;
 import com.example.todo.userapi.dto.UserSignUpDTO;
 import com.example.todo.userapi.dto.UserSignUpResponseDTO;
 import com.example.todo.userapi.entity.UserEntity;
+import com.example.todo.userapi.exception.DuplicatedEmailException;
+import com.example.todo.userapi.exception.NoRegisteredArgumentsException;
 import com.example.todo.userapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +22,12 @@ public class UserService {
     // 회원가입 처리
     public UserSignUpResponseDTO create(final UserSignUpDTO userSignUpDTO) {
         if (userSignUpDTO == null) {
-            throw new RuntimeException("가입정보가 없습니다.");
+            throw new NoRegisteredArgumentsException("가입정보가 없습니다.");
         }
         final String email = userSignUpDTO.getEmail();
         if (userRepository.existsByEmail(email)) {
             log.warn("Email already exists - {}", email);
-            throw new RuntimeException("중복된 이메일입니다.");
+            throw new DuplicatedEmailException("중복된 이메일입니다.");
         }
         // 패스워드 인코딩
         String rawPassword = userSignUpDTO.getPassword(); // 평문 암호
@@ -33,6 +35,8 @@ public class UserService {
         userSignUpDTO.setPassword(encodedPassword);
 
         UserEntity savedUser = userRepository.save(userSignUpDTO.toEntity());
+
+        log.info("회원 가입 성공!! -user_id: {}", savedUser.getId());
         return new UserSignUpResponseDTO(savedUser);
     }
 }
