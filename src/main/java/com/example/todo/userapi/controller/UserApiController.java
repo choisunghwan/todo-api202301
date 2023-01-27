@@ -1,5 +1,7 @@
 package com.example.todo.userapi.controller;
 
+import com.example.todo.userapi.dto.LoginRequestDTO;
+import com.example.todo.userapi.dto.LoginResponseDTO;
 import com.example.todo.userapi.dto.UserSignUpDTO;
 import com.example.todo.userapi.dto.UserSignUpResponseDTO;
 import com.example.todo.userapi.exception.DuplicatedEmailException;
@@ -66,6 +68,29 @@ public class UserApiController {
         boolean flag = userService.isDuplicate(email);
         log.info("{} 중복 여부?? - {}", email, flag);
         return ResponseEntity.ok().body(flag);
+    }
+
+    // 로그인 요청 처리
+    @PostMapping("/signin")
+    public ResponseEntity<?> signIn(
+            @Validated @RequestBody LoginRequestDTO requestDTO) {
+
+        try {
+            LoginResponseDTO userInfo = userService.getByCredentials(
+                    requestDTO.getEmail(),
+                    requestDTO.getPassword()
+            );
+            return ResponseEntity
+                    .ok()
+                    .body(userInfo);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(LoginResponseDTO.builder()
+                            .message(e.getMessage())
+                            .build()
+                    );
+        }
     }
 
 }
