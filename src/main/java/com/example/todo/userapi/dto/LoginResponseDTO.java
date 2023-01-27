@@ -20,7 +20,7 @@ public class LoginResponseDTO {
 
     private String token; // 인증 토큰
 
-    private  String message; // 응답
+    private  String message; // 응답 메시지
 
     // 엔터티를 DTO로 변경
     public LoginResponseDTO(UserEntity userEntity, String token) {
