@@ -7,6 +7,7 @@ import com.example.todo.todoapi.service.TodoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +27,10 @@ public class TodoApiController {
     // 할 일 등록 요청
     @PostMapping
     public ResponseEntity<?> createTodo(
-            @Validated @RequestBody TodoCreateRequestDTO requestDTO
+            @AuthenticationPrincipal String userId
+            , @Validated @RequestBody TodoCreateRequestDTO requestDTO
             , BindingResult result
+
     ) {
         if (result.hasErrors()) {
             log.warn("DTO 검증 에러 발생 : {}", result.getFieldError());
@@ -37,7 +40,7 @@ public class TodoApiController {
         }
 
         try {
-            TodoListResponseDTO responseDTO = todoService.create(requestDTO);
+            TodoListResponseDTO responseDTO = todoService.create(requestDTO, userId);
             return ResponseEntity
                     .ok()
                     .body(responseDTO);
@@ -53,7 +56,8 @@ public class TodoApiController {
     // 할 일 삭제 요청
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTodo(
-            @PathVariable("id") String todoId
+            @AuthenticationPrincipal String userId
+            , @PathVariable("id") String todoId
     ) {
         log.info("/api/todos/{} DELETE request!", todoId);
 
@@ -64,7 +68,7 @@ public class TodoApiController {
         }
 
         try {
-            TodoListResponseDTO responseDTO = todoService.delete(todoId);
+            TodoListResponseDTO responseDTO = todoService.delete(todoId, userId);
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
@@ -74,10 +78,13 @@ public class TodoApiController {
 
     // 할 일 목록요청 (GET)
     @GetMapping
-    public ResponseEntity<?> retrieveTodoList() {
+    public ResponseEntity<?> retrieveTodoList(
+            // 인증완료처리시 등록했던 값을 넣어줌
+            @AuthenticationPrincipal String userId
+    ) {
         log.info("/api/todos GET request!");
 
-        TodoListResponseDTO responseDTO = todoService.retrieve();
+        TodoListResponseDTO responseDTO = todoService.retrieve(userId);
 
         return ResponseEntity.ok().body(responseDTO);
 
@@ -89,7 +96,8 @@ public class TodoApiController {
             , method = {RequestMethod.PUT, RequestMethod.PATCH}
     )
     public ResponseEntity<?> updateTodo(
-            @PathVariable("id") String todoId
+            @AuthenticationPrincipal String userId
+            , @PathVariable("id") String todoId
             , @Validated @RequestBody TodoModifyRequestDTO requestDTO
             , BindingResult result
             , HttpServletRequest request
@@ -103,7 +111,7 @@ public class TodoApiController {
         log.info("modifying dto : {}", requestDTO);
 
         try {
-            TodoListResponseDTO responseDTO = todoService.update(todoId, requestDTO);
+            TodoListResponseDTO responseDTO = todoService.update(todoId, requestDTO, userId);
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
@@ -112,10 +120,3 @@ public class TodoApiController {
     }
 
 }
-
-
-
-
-
-
-

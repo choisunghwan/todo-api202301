@@ -20,12 +20,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class TodoService {
+
     private final TodoRepository todoRepository;
 
-    //할 일 목록 조회
+
+    // 할 일 목록 조회
     @Transactional
-    public TodoListResponseDTO retrieve(){
-        List<TodoEntity> entityList = todoRepository.findAll();
+    public TodoListResponseDTO retrieve(String userId) {
+        List<TodoEntity> entityList = todoRepository.findByUserId(userId);
 
         List<TodoDetailResponseDTO> dtoList = entityList.stream()
                 .map(TodoDetailResponseDTO::new)
@@ -37,40 +39,52 @@ public class TodoService {
     }
 
     // 할 일 등록
-    public TodoListResponseDTO create(final TodoCreateRequestDTO createRequestDTO){
-        todoRepository.save(createRequestDTO.toEntity());
+    public TodoListResponseDTO create(
+            final TodoCreateRequestDTO createRequestDTO
+            ,final String userId
+    )
+            throws RuntimeException
+    {
+        TodoEntity todo = createRequestDTO.toEntity();
+        todo.setUserId(userId);
+
+        todoRepository.save(todo);
         log.info("할 일이 저장되었습니다. 제목 : {}", createRequestDTO.getTitle());
-        return retrieve();
+        return retrieve(userId);
     }
 
-    //할 일 수정 (제목, 할일 완료 여부)
+    // 할 일 수정 (제목, 할일 완료여부)
     public TodoListResponseDTO update(
             final String id,
-            final TodoModifyRequestDTO modifyRequestDTO
-    ){
-        Optional<TodoEntity> targetEntity = todoRepository.findById(id); //조회
+            final TodoModifyRequestDTO modifyRequestDTO,
+            final String userId
+    ) {
+        Optional<TodoEntity> targetEntity = todoRepository.findById(id);
 
-        targetEntity.ifPresent(entity -> {                              //setter 로 수정
+        targetEntity.ifPresent(entity -> {
             entity.setTitle(modifyRequestDTO.getTitle());
             entity.setDone(modifyRequestDTO.isDone());
 
-            todoRepository.save(entity);                                //저장
+            todoRepository.save(entity);
         });
 
-        return retrieve();
+        return retrieve(userId);
     }
 
     // 할 일 삭제
+    public TodoListResponseDTO delete(final String id, final String userId) {
 
-    public TodoListResponseDTO delete(final String id){
 
-        try{
+        try {
             todoRepository.deleteById(id);
-        }catch (Exception e){
-            log.error("id가 존재하지 않아 삭제에 실패했습니다. --ID: {},err:{}",id,e.getMessage()); //서버에게 알려줄 메시지
-            throw new RuntimeException("id가 존재하지 않아 삭제에 실패했습니다.");                  //클라이언트에게 알려줄 메시지
+        } catch (Exception e) {
+            log.error("id가 존재하지 않아 삭제에 실패했습니다. - ID: {}, err: {}"
+                    , id, e.getMessage());
+            throw new RuntimeException("id가 존재하지 않아 삭제에 실패했습니다.");
         }
-        return  retrieve();
+        return retrieve(userId);
     }
+
+
 
 }

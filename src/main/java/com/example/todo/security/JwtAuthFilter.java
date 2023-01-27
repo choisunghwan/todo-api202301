@@ -57,6 +57,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             }
         } catch (Exception e) {
+//            e.printStackTrace();
             log.error("인증되지 않은 사용자입니다.");
         }
 
