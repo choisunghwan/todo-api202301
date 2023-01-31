@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
-@CrossOrigin
+//@CrossOrigin //보안 취약
 public class UserApiController {
 
     private final UserService userService;
