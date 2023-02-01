@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 /*서버가 돌아가는지 확인해주기 위한 컨트롤러*/
 @RestController
 @Slf4j
-@CrossOrigin
+//@CrossOrigin
 
 public class HealthCheckController {
 
